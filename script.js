@@ -99,6 +99,27 @@ const formatCurrency = function (value, locale, currency) {
   }).format(value);
 };
 
+const startLogOutTimer = function (session = 300) {
+  const tick = function () {
+    if (time === 0) {
+      clearInterval(timer);
+      containerApp.style.opacity = 0;
+      labelWelcome.textContent = 'Log in to get started';
+    }
+    [min, sec] = [
+      `${Math.floor(time / 60)}`.padStart(2, 0),
+      `${time % 60}`.padStart(2, 0),
+    ];
+    labelTimer.textContent = `${min}:${sec}`;
+    time--;
+  };
+  let time, min, sec;
+  time = session;
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
+};
+
 const displayMovements = function (account, sort = false) {
   containerMovements.innerHTML = '';
   const movs = sort
@@ -179,7 +200,7 @@ const updateUI = function () {
 };
 
 // Event Handler
-let currentAccount;
+let currentAccount, timer;
 btnLogin.addEventListener('click', function (e) {
   // prevent form from submitting (which triggers automatic page reload)
   e.preventDefault();
@@ -207,6 +228,8 @@ btnLogin.addEventListener('click', function (e) {
       options
     ).format(now);
 
+    if (timer) clearInterval(timer);
+    timer = startLogOutTimer();
     updateUI();
   }
 });
@@ -228,6 +251,8 @@ btnTransfer.addEventListener('click', function (e) {
     currentAccount.movementsDates.push(new Date().toISOString());
     receiverAccount.movementsDates.push(new Date().toISOString());
     updateUI();
+    clearInterval(timer);
+    timer = startLogOutTimer();
   }
   inputTransferAmount.value = inputTransferTo.value = '';
 });
@@ -251,9 +276,13 @@ btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
   const amount = Math.floor(inputLoanAmount.value);
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
-    currentAccount.movements.push(amount);
-    currentAccount.movementsDates.push(new Date().toISOString());
-    updateUI();
+    setTimeout(function () {
+      currentAccount.movements.push(amount);
+      currentAccount.movementsDates.push(new Date().toISOString());
+      updateUI();
+      clearInterval(timer);
+      timer = startLogOutTimer();
+    }, 3000);
   }
   inputLoanAmount.value = '';
 });
@@ -393,3 +422,20 @@ const options = {
 console.log('US:      ', new Intl.NumberFormat('en-US', options).format(num));
 console.log('Germany: ', new Intl.NumberFormat('de-DE', options).format(num));
 console.log('Syria:   ', new Intl.NumberFormat('ar-SY', options).format(num));
+
+// setTimeout
+const ingredients = ['olives', 'spinach']; // ['olives', 'tomatos']
+const pizzaTimer = setTimeout(
+  (ing1, ing2) => console.log(`Here is your pizza with ${ing1} and ${ing2} 🍕`),
+  3000,
+  ...ingredients
+);
+console.log('Waiting...');
+if (ingredients.includes('spinach')) clearTimeout(pizzaTimer);
+
+// setInterval
+setInterval(function () {
+  const now = new Date();
+  const [hr, min, sec] = [now.getHours(), now.getMinutes(), now.getSeconds()];
+  console.log(`${hr}:${min}:${sec}`);
+}, 2000);
