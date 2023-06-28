@@ -80,21 +80,16 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 /////////////////////////////////////////////////
 // Functions
-const formatMovementDate = function (movDate) {
+const formatMovementDate = function (date, locale) {
   const calcDaysPassed = (date1InMillisecond, date2InMillisecond) =>
     Math.round(
       Math.abs(date1InMillisecond - date2InMillisecond) / (24 * 60 * 60 * 1000)
     );
-  const daysPassed = calcDaysPassed(new Date(), movDate);
-  const [date, month, year] = [
-    `${movDate.getDate()}`.padStart(2, 0),
-    `${movDate.getMonth() + 1}`.padStart(2, 0),
-    movDate.getFullYear(),
-  ];
+  const daysPassed = calcDaysPassed(new Date(), date);
   if (daysPassed === 0) return 'Today';
   if (daysPassed === 1) return 'Yesterday';
   if (daysPassed <= 7) return `${daysPassed} days ago`;
-  return `${date}/${month}/${year}`;
+  return new Intl.DateTimeFormat(locale).format(date);
 };
 
 const displayMovements = function (account, sort = false) {
@@ -110,7 +105,10 @@ const displayMovements = function (account, sort = false) {
       <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-      <div class="movements__date">${formatMovementDate(movDate)}</div>
+      <div class="movements__date">${formatMovementDate(
+        movDate,
+        account.locale
+      )}</div>
       <div class="movements__value">${mov.toFixed(2)} €</div>
     </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -158,16 +156,6 @@ const updateUI = function () {
   calcDisplaySummary(currentAccount);
 };
 
-const now = new Date();
-const [year, month, date, hour, minute] = [
-  now.getFullYear(),
-  `${now.getMonth() + 1}`.padStart(2, 0),
-  `${now.getDate()}`.padStart(2, 0),
-  `${now.getHours()}`.padStart(2, 0),
-  `${now.getMinutes()}`.padStart(2, 0),
-];
-labelDate.textContent = `${date}/${month}/${year}, ${hour}:${minute}`;
-
 // Event Handler
 let currentAccount;
 btnLogin.addEventListener('click', function (e) {
@@ -183,6 +171,20 @@ btnLogin.addEventListener('click', function (e) {
     containerApp.style.opacity = 100;
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
+
+    const now = Date.now();
+    const options = {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+    };
+    labelDate.textContent = new Intl.DateTimeFormat(
+      currentAccount.locale,
+      options
+    ).format(now);
+
     updateUI();
   }
 });
