@@ -284,3 +284,25 @@ console.log((2.7).toFixed(3));
 console.log((2.77).toFixed(3));
 console.log((2.777).toFixed(3));
 console.log((2.7777).toFixed(3));
+
+// Numeric separator
+console.log('=== Numeric separator ===');
+console.log(287460000000);
+console.log(287_460_000_000);
+console.log(3.14_159);
+console.log(Number('12345'));
+console.log(Number('12_345'));
+
+// BigInt
+console.log('=== BigInt ===');
+console.log(2 ** 53 - 1);
+console.log(Number.MAX_SAFE_INTEGER);
+console.log(BigInt(234567898765432));
+console.log(234567898765432n);
+console.log(10n + 20n);
+console.log(BigInt(10) + 20n);
+console.log(20n > 15);
+console.log(20n === 20);
+console.log(20n == '20');
+console.log(11n / 3n);
+console.log(11 / 3);
