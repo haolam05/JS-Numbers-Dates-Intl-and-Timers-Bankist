@@ -40,10 +40,10 @@ const account2 = {
     '2019-11-30T09:48:16.867Z',
     '2019-12-25T06:04:23.907Z',
     '2020-01-25T14:18:46.235Z',
-    '2020-02-05T16:33:06.386Z',
-    '2020-04-10T14:43:26.374Z',
-    '2020-06-25T18:49:59.371Z',
-    '2020-07-26T12:01:20.894Z',
+    '2023-06-21T16:33:06.386Z',
+    '2023-06-23T14:43:26.374Z',
+    '2023-06-26T18:49:59.371Z',
+    '2023-06-27T19:01:20.894Z',
   ],
   currency: 'USD',
   locale: 'en-US',
@@ -80,6 +80,23 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 /////////////////////////////////////////////////
 // Functions
+const formatMovementDate = function (movDate) {
+  const calcDaysPassed = (date1InMillisecond, date2InMillisecond) =>
+    Math.round(
+      Math.abs(date1InMillisecond - date2InMillisecond) / (24 * 60 * 60 * 1000)
+    );
+  const daysPassed = calcDaysPassed(new Date(), movDate);
+  const [date, month, year] = [
+    `${movDate.getDate()}`.padStart(2, 0),
+    `${movDate.getMonth() + 1}`.padStart(2, 0),
+    movDate.getFullYear(),
+  ];
+  if (daysPassed === 0) return 'Today';
+  if (daysPassed === 1) return 'Yesterday';
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  return `${date}/${month}/${year}`;
+};
+
 const displayMovements = function (account, sort = false) {
   containerMovements.innerHTML = '';
   const movs = sort
@@ -87,19 +104,13 @@ const displayMovements = function (account, sort = false) {
     : account.movements;
   movs.forEach(function (mov, i) {
     const movDate = new Date(account.movementsDates[i]);
-    const [date, month, year] = [
-      `${movDate.getDate()}`.padStart(2, 0),
-      `${movDate.getMonth() + 1}`.padStart(2, 0),
-      movDate.getFullYear(),
-    ];
-    const displayDate = `${date}/${month}/${year}`;
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-      <div class="movements__date">${displayDate}</div>
+      <div class="movements__date">${formatMovementDate(movDate)}</div>
       <div class="movements__value">${mov.toFixed(2)} €</div>
     </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
